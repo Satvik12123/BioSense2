@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CareBand</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-dark: #05060a;
+      --glass-bg: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --accent1: #7F5CFF;
+      --accent2: #00D4FF;
+      --text-main: #ffffff;
+      --text-muted: #b3b8c6;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top left, #111827 0, #05060a 40%, #000000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Glow background */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: -1;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(127, 92, 255, 0.35) 0, transparent 50%),
+        radial-gradient(circle at 90% 100%, rgba(0, 212, 255, 0.35) 0, transparent 50%);
+      filter: blur(40px);
+    }
+
+    /* Navbar (only for main site) */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      z-index: 20;
+      background: rgba(5, 6, 10, 0.65);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .navbar-logo {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 18px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .navbar-logo span {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+    }
+
+    .navbar-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      position: relative;
+      padding-bottom: 4px;
+      transition: color 0.2s ease;
+    }
+
+    .navbar-links a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      transition: width 0.2s ease;
+    }
+
+    .navbar-links a:hover {
+      color: var(--text-main);
+    }
+
+    .navbar-links a:hover::after {
+      width: 100%;
+    }
+
+    .navbar-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      color: #ffffff;
+      box-shadow: 0 0 18px rgba(127, 92, 255, 0.6);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 26px rgba(127, 92, 255, 0.9);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text-main);
+      border-color: rgba(255, 255, 255, 0.35);
+    }
+
+    /* Auth gate */
+    #auth-gate {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      background: radial-gradient(circle at top, #111827 0, #05060a 40%, #000000 100%);
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 32px 32px 28px;
+      border-radius: 24px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(22px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 0 40px rgba(127, 92, 255, 0.45);
+      position: relative;
+    }
+
+    .auth-header {
+      margin-bottom: 20px;
+    }
+
+    .auth-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .auth-title span {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .auth-subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .auth-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .auth-toggle button {
+      background: none;
+      border: none;
+      color: var(--accent2);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+    }
+
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .auth-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .auth-label {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .auth-input {
+      background: rgba(5, 6, 10, 0.7);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 9px 14px;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: border 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .auth-input:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.6);
+    }
+
+    .auth-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .auth-footer {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .auth-footer button {
+      background: none;
+      border: none;
+      color: var(--accent2);
+      cursor: pointer;
+      font-size: 12px;
+      padding: 0;
+    }
+
+    .auth-error {
+      font-size: 12px;
+      color: #ff6b6b;
+      min-height: 16px;
+      margin-bottom: 4px;
+    }
+
+    /* Main site container */
+    #site {
+      display: none; /* shown after login */
+    }
+
+    .section {
+      padding: 96px 64px;
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .section-hero {
+      padding-top: 120px;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      gap: 40px;
+      align-items: center;
+    }
+
+    .hero-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 40px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .hero-title span {
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin-bottom: 20px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .hero-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .hero-visual {
+      position: relative;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-ring {
+      width: 260px;
+      height: 260px;
+      border-radius: 50%;
+      background: conic-gradient(from 180deg, var(--accent1), var(--accent2), var(--accent1));
+      filter: blur(12px);
+      opacity: 0.7;
+      position: absolute;
+    }
+
+    .hero-band-card {
+      width: 220px;
+      height: 220px;
+      border-radius: 32px;
+      background: rgba(5, 6, 10, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: 0 0 40px rgba(127, 92, 255, 0.7);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 18px;
+      gap: 10px;
+    }
+
+    .hero-band-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .hero-band-chip {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    }
+
+    .hero-band-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .metric-card {
+      border-radius: 14px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px;
+      font-size: 11px;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .metric-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .metric-tag {
+      font-size: 10px;
+      color: var(--accent2);
+      margin-top: 2px;
+    }
+
+    .hero-band-footer {
+      margin-top: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hero-band-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    /* Generic section titles */
+    .section-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 26px;
+      margin-bottom: 8px;
+    }
+
+    .section-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      max-width: 520px;
+    }
+
+    /* Product section */
+    .product-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      gap: 32px;
+      align-items: center;
+    }
+
+    .highlight-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 12px;
+    }
+
+    .highlight-card {
+      border-radius: 16px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .highlight-card span {
+      display: block;
+      font-size: 13px;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    /* Features section */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .feature-card {
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 14px 14px 12px;
+      font-size: 13px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border 0.15s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 24px rgba(127, 92, 255, 0.6);
+      border-color: rgba(127, 92, 255, 0.7);
+    }
+
+    .feature-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .feature-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Pricing section */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .pricing-card {
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 16px 16px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .pricing-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px;
+    }
+
+    .pricing-price {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .pricing-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .pricing-list {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .pricing-list li {
+      margin-bottom: 2px;
+    }
+
+    /* Dashboard section (prototype) */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .dash-card {
+      border-radius: 18px;
+      background: rgba(17, 24, 39, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 14px;
+      font-size: 12px;
+    }
+
+    .dash-label {
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .dash-value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .dash-tag {
+      font-size: 11px;
+      color: var(--accent2);
+      margin-top: 2px;
+    }
+
+    /* Footer */
+    .footer {
+      padding: 32px 64px 40px;
+      max-width: 1120px;
+      margin: 0 auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      margin-top: 40px;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 16px;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-main);
+    }
+
+    @media (max-width: 900px) {
+      .navbar {
+        padding: 0 20px;
+      }
+      .section {
+        padding: 80px 20px;
+      }
+      .section-hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .hero-visual {
+        margin-top: 24px;
+      }
+      .product-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .features-grid,
+      .pricing-grid,
+      .dashboard-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .auth-card {
+        margin: 0 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- AUTH GATE -->
+  <div id="auth-gate">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-title">
+          <span>CareBand</span> Access
+        </div>
+        <div class="auth-subtitle">
+          Sign in or create an account to enter your CareBand experience.
+        </div>
+      </div>
+
+      <div class="auth-toggle">
+        <span id="auth-mode-label">New here?</span>
+        <button type="button" id="auth-toggle-btn">Switch to Sign Up</button>
+      </div>
+
+      <div class="auth-error" id="auth-error"></div>
+
+      <!-- AUTH FORM -->
+      <form id="auth-form" class="auth-form">
+        <!-- Sign up only fields (hidden in sign in mode) -->
+        <div class="auth-field auth-signup-only" style="display:none;">
+          <label class="auth-label">Full Name</label>
+          <input type="text" class="auth-input" id="auth-name" placeholder="e.g. Supriya" />
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Email</label>
+          <input type="email" class="auth-input" id="auth-email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="auth-field">
+          <label class="auth-label">Password</label>
+          <input type="password" class="auth-input" id="auth-password" placeholder="••••••••" required />
+        </div>
+
+        <div class="auth-field auth-signup-only" style="display:none;">
+          <label class="auth-label">Confirm Password</label>
+          <input type="password" class="auth-input" id="auth-password-confirm" placeholder="••••••••" />
+        </div>
+
+        <div class="auth-field auth-signup-only" style="display:none;">
+          <label class="auth-label">Country</label>
+          <input type="text" class="auth-input" id="auth-country" placeholder="United States" />
+        </div>
+
+        <div class="auth-checkbox-row auth-signup-only" style="display:none;">
+          <input type="checkbox" id="auth-has-device" />
+          <label for="auth-has-device">I have a CareBand device</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="auth-submit-btn">
+          Sign In
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <span id="auth-footer-text">Forgot password?</span>
+        <button type="button" id="auth-footer-action">Contact support</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN SITE (hidden until login) -->
+  <div id="site">
+    <!-- NAVBAR -->
+    <header class="navbar">
+      <div class="navbar-logo">
+        <span>CareBand</span> 
+      </div>
+      <nav class="navbar-links">
+        <a href="#hero">Home</a>
+        <a href="#product">Product</a>
+        <a href="#features">Features</a>
+        <a href="#app">App</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#dashboard">Dashboard</a>
+        <a href="#about">About</a>
+      </nav>
+      <div class="navbar-actions">
+        <button class="btn btn-ghost" id="logout-btn">Logout</button>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="section section-hero" id="hero">
+      <div>
+        <h1 class="hero-title">
+          <span>CareBand</span> — Intelligence You Can Wear
+        </h1>
+        <p class="hero-subtitle">
+          A smart, AI‑powered band designed to protect, monitor, and elevate everyday wellbeing. 
+          This prototype shows how your future CareBand experience could look and feel.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary">Get CareBand</button>
+          <button class="btn btn-ghost">Watch Demo</button>
+        </div>
+        <p class="hero-meta">
+          Logged in as <span id="user-email-label">you@example.com</span> • CareBand dashboard ready to receive live data.
+        </p>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-ring"></div>
+        <div class="hero-band-card">
+          <div class="hero-band-header">
+            <span>CareBand Live</span>
+            <div class="hero-band-chip"></div>
+          </div>
+          <div class="hero-band-metrics">
+            <div class="metric-card">
+              <div class="metric-label">Heart Rate</div>
+              <div class="metric-value" id="metric-hr">72 bpm</div>
+              <div class="metric-tag">Resting</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Stress Score</div>
+              <div class="metric-value" id="metric-stress">34%</div>
+              <div class="metric-tag">Calm</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Sleep Score</div>
+              <div class="metric-value" id="metric-sleep">82</div>
+              <div class="metric-tag">Last night</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-label">Battery</div>
+              <div class="metric-value" id="metric-battery">87%</div>
+              <div class="metric-tag">Charging soon</div>
+            </div>
+          </div>
+          <div class="hero-band-footer">
+            <div class="hero-band-status">
+              <div class="status-dot"></div>
+              <span>Band connected</span>
+            </div>
+            <span>CareCircle: Active</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCT -->
+    <section class="section" id="product">
+      <h2 class="section-title">Meet CareBand</h2>
+      <p class="section-subtitle">
+        CareBand is a next‑generation wearable built for real‑time care, safety, and wellness. 
+        This prototype focuses on the experience and interface, ready to connect to real hardware later.
+      </p>
+      <div class="product-grid">
+        <div>
+          <p style="font-size:14px; color:var(--text-muted);">
+            Designed with premium materials, intelligent sensors, and an AI engine that understands you. 
+            CareBand wraps care around your wrist, turning everyday moments into meaningful insights.
+          </p>
+          <div class="highlight-list">
+            <div class="highlight-card">
+              <span>Ultra‑soft silicone</span>
+              Comfortable enough for all‑day wear, even while sleeping.
+            </div>
+            <div class="highlight-card">
+              <span>7‑day battery</span>
+              Long‑lasting performance with smart power management.
+            </div>
+            <div class="highlight-card">
+              <span>Water‑resistant</span>
+              Built to handle sweat, rain, and everyday splashes.
+            </div>
+            <div class="highlight-card">
+              <span>AI‑powered insights</span>
+              Understand trends in stress, sleep, and recovery.
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="metric-card" style="height:100%; display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div class="metric-label">Prototype Status</div>
+              <div class="metric-value">Experience‑First</div>
+              <div class="metric-tag">Hardware coming next</div>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">
+              This site is built as a prototype: once your CareBand hardware and APIs are ready, 
+              this interface can start receiving live data from real devices.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="features">
+      <h2 class="section-title">Features</h2>
+      <p class="section-subtitle">
+        A quick overview of what CareBand could track and analyze for your users. 
+        All of this is ready to connect to real sensor data.
+      </p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-title">Health Monitoring</div>
+          <div class="feature-desc">
+            Heart rate, HRV, stress, and sleep tracking—visualized in a clean, modern dashboard.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Safety Alerts</div>
+          <div class="feature-desc">
+            Fall detection, SOS tap, and location‑aware alerts for peace of mind.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Smart Insights</div>
+          <div class="feature-desc">
+            AI‑generated wellness scores and recommendations based on trends over time.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">CareCircle</div>
+          <div class="feature-desc">
+            A private dashboard for family or caregivers to stay informed and connected.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Daily Wellness Score</div>
+          <div class="feature-desc">
+            A simple, powerful score that summarizes how your day is going.
+          </div>
+        </div>
+         <div class="feature-card">
+          <div class="feature-title">Disease Detection</div>
+          <div class="feature-desc">
+            An accurate detection of any disease that can be occuring.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- APP -->
+    <section class="section" id="app">
+      <h2 class="section-title">CareBand App</h2>
+      <p class="section-subtitle">
+        A clean, modern interface powered by AI, designed with love, passion, and intuitive navigation.
+      </p>
+      <p style="font-size:14px; color:var(--text-muted); margin-bottom:16px;">
+        In a full implementation, this section would showcase real app screens. 
+        For now, it represents the design language and flow your mobile app could follow.
+      </p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-title">Dashboard</div>
+          <div class="feature-desc">
+            At‑a‑glance view of vitals, stress, sleep, and battery.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Alerts</div>
+          <div class="feature-desc">
+            Real‑time notifications for important events and thresholds.
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-title">Insights</div>
+          <div class="feature-desc">
+            AI‑generated summaries of your health trends.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section class="section" id="pricing">
+      <h2 class="section-title">Pricing</h2>
+      <p class="section-subtitle">
+        Example pricing tiers for CareBand. These are placeholders you can refine later.
+      </p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="pricing-name">CareBand</div>
+          <div class="pricing-price">$199</div>
+          <div class="pricing-meta">One‑time device cost</div>
+          <ul class="pricing-list">
+            <li>Full in-depth tracking</li> <li>Immediate Alerts</li>
+            <li>Full app access</li>        <li>Firmware updates</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD (prototype data) -->
+    <section class="section" id="dashboard">
+      <h2 class="section-title">Dashboard</h2>
+      <p class="section-subtitle">
+        This section simulates how live CareBand data could appear once your hardware and APIs are connected.
+      </p>
+      <div class="dashboard-grid">
+        <div class="dash-card">
+          <div class="dash-label">Heart Rate</div>
+          <div class="dash-value" id="dash-hr">72 bpm</div>
+          <div class="dash-tag">Live from CareBand</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Stress Score</div>
+          <div class="dash-value" id="dash-stress">34%</div>
+          <div class="dash-tag">Low stress</div>
+        </div>
+       <div class="metric-card">
+        <div class="metric-label">Disease Detection</div>
+        <div class="metric-value" id="metric-disease">Healthy</div>
+        <div class="metric-tag">AI Scan</div>
+  
+        <div class="dash-card">
+          <div class="dash-label">Battery</div>
+          <div class="dash-value" id="dash-battery">87%</div>
+          <div class="dash-tag">Charging soon</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Band Status</div>
+          <div class="dash-value" id="dash-status">Connected</div>
+          <div class="dash-tag">Prototype connection</div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-label">Daily Wellness Score</div>
+          <div class="dash-value" id="dash-wellness">78</div>
+          <div class="dash-tag">Balanced day</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="section" id="about">
+      <h2 class="section-title">About CareBand</h2>
+      <p class="section-subtitle">
+        CareBand aims to make care accessible, intelligent, and always within reach. 
+        This prototype focuses on the experience and interface, paving the way for real hardware integration.
+      </p>
+      <p style="font-size:14px; color:var(--text-muted);">
+        Mission: To wrap care around everyday life in a way that feels natural, beautiful, and genuinely helpful.<br/><br/>
+        Vision: A world where everyone feels supported—every moment, everywhere.<br/><br/>
+        Values: Simplicity • Intelligence • Trust • Design Excellence.
+      </p>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <div>© 2026 CareBand. All rights reserved.</div>
+      <div class="footer-links">
+        <a href="#hero">Home</a>
+        <a href="#support">Support</a>
+        <a href="#about">About</a>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // Simple prototype auth (no backend, just localStorage)
+    const authGate = document.getElementById('auth-gate');
+    const site = document.getElementById('site');
+    const authForm = document.getElementById('auth-form');
+    const authError = document.getElementById('auth-error');
+    const authModeLabel = document.getElementById('auth-mode-label');
+    const authToggleBtn = document.getElementById('auth-toggle-btn');
+    const authSubmitBtn = document.getElementById('auth-submit-btn');
+    const authFooterText = document.getElementById('auth-footer-text');
+    const authFooterAction = document.getElementById('auth-footer-action');
+    const userEmailLabel = document.getElementById('user-email-label');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const signupOnlyFields = document.querySelectorAll('.auth-signup-only');
+
+    let authMode = 'signin'; // 'signin' or 'signup'
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      if (mode === 'signin') {
+        authModeLabel.textContent = 'New here?';
+        authToggleBtn.textContent = 'Switch to Sign Up';
+        authSubmitBtn.textContent = 'Sign In';
+        authFooterText.textContent = 'Forgot password?';
+        authFooterAction.textContent = 'Contact support';
+        signupOnlyFields.forEach(el => el.style.display = 'none');
+      } else {
+        authModeLabel.textContent = 'Already have an account?';
+        authToggleBtn.textContent = 'Switch to Sign In';
+        authSubmitBtn.textContent = 'Sign Up';
+        authFooterText.textContent = 'By signing up, you accept the prototype terms.';
+        authFooterAction.textContent = 'View terms';
+        signupOnlyFields.forEach(el => el.style.display = 'flex');
+      }
+      authError.textContent = '';
+    }
+
+    authToggleBtn.addEventListener('click', () => {
+      setAuthMode(authMode === 'signin' ? 'signup' : 'signin');
+    });
+
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      authError.textContent = '';
+
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value.trim();
+
+      if (!email || !password) {
+        authError.textContent = 'Please enter both email and password.';
+        return;
+      }
+
+      if (authMode === 'signup') {
+        const confirm = document.getElementById('auth-password-confirm').value.trim();
+        if (password.length < 6) {
+          authError.textContent = 'Password should be at least 6 characters.';
+          return;
+        }
+        if (password !== confirm) {
+          authError.textContent = 'Passwords do not match.';
+          return;
+        }
+        // Store user in localStorage (prototype only)
+        const user = { email };
+        localStorage.setItem('carebandUser', JSON.stringify(user));
+        localStorage.setItem('carebandAuth', 'true');
+        enterSite(user);
+      } else {
+        // Sign in: check if user exists (prototype)
+        const stored = localStorage.getItem('carebandUser');
+        if (!stored) {
+          authError.textContent = 'No account found. Please sign up first.';
+          return;
+        }
+        const user = JSON.parse(stored);
+        if (user.email !== email) {
+          authError.textContent = 'Email does not match the registered account.';
+          return;
+        }
+        localStorage.setItem('carebandAuth', 'true');
+        enterSite(user);
+      }
+    });
+
+    function enterSite(user) {
+      userEmailLabel.textContent = user.email;
+      authGate.style.display = 'none';
+      site.style.display = 'block';
+      // Scroll to hero
+      document.getElementById('hero').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('carebandAuth');
+      authGate.style.display = 'flex';
+      site.style.display = 'none';
+    });
+
+    // On load: check if already logged in
+    window.addEventListener('load', () => {
+      const auth = localStorage.getItem('carebandAuth');
+      const stored = localStorage.getItem('carebandUser');
+      if (auth === 'true' && stored) {
+        const user = JSON.parse(stored);
+        enterSite(user);
+      } else {
+        setAuthMode('signin');
+      }
+
+      // Simple fake data updates for dashboard metrics (prototype)
+      setInterval(() => {
+        const hr = 65 + Math.floor(Math.random() * 15);
+        const stress = 20 + Math.floor(Math.random() * 40);
+        const sleep = 70 + Math.floor(Math.random() * 20);
+        const battery = 60 + Math.floor(Math.random() * 40);
+        const wellness = 70 + Math.floor(Math.random() * 20);
+
+        document.getElementById('metric-hr').textContent = hr + ' bpm';
+        document.getElementById('metric-stress').textContent = stress + '%';
+        document.getElementById('metric-sleep').textContent = sleep;
+        document.getElementById('metric-battery').textContent = battery + '%';
+
+        document.getElementById('dash-hr').textContent = hr + ' bpm';
+        document.getElementById('dash-stress').textContent = stress + '%';
+        document.getElementById('dash-sleep').textContent = sleep;
+        document.getElementById('dash-battery').textContent = battery + '%';
+        document.getElementById('dash-wellness').textContent = wellness;
+      }, 3000);
+    });
+  </script>
+</body>
+</html>
